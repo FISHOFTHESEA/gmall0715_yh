@@ -4,10 +4,7 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.atguigu.gmall0715.bean.*;
 import com.atguigu.gmall0715.service.ManageService;
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureMockRestServiceServer;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -61,6 +58,15 @@ public class ManagerController {
 
         return baseAttrInfo.getAttrValueList();
 
+    }
+
+    /**
+     * http://localhost:8082/baseSaleAttrList
+     * 查询消费属性列表
+     */
+    @PostMapping("baseSaleAttrList")
+    public List<BaseSaleAttr> getBaseSaleAttrList(){
+        return manageService.selectBaseSaleAttrList();
     }
 
 

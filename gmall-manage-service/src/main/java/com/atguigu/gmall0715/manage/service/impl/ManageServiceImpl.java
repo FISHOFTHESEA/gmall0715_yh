@@ -44,6 +44,18 @@ public class ManageServiceImpl implements ManageService {
     @Autowired
     private SpuImageMapper spuImageMapper;
 
+    @Autowired
+    private SkuInfoMapper skuInfoMapper;
+
+    @Autowired
+    private SkuImageMapper skuImageMapper;
+
+    @Autowired
+    private SkuAttrValueMapper skuAttrValueMapper;
+
+    @Autowired
+    private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
     @Override
     public List<BaseCatalog1> getCatalog1() {
 
@@ -72,9 +84,7 @@ public class ManageServiceImpl implements ManageService {
     }
 
     @Override
-    public List<BaseAttrInfo> getAttrList(String catalog3Id) {
-        BaseAttrInfo baseAttrInfo = new BaseAttrInfo();
-        baseAttrInfo.setCatalog3Id(catalog3Id);
+    public List<BaseAttrInfo> getAttrList(BaseAttrInfo baseAttrInfo) {
         return baseAttrInfoMapper.select(baseAttrInfo);
     }
 
@@ -197,17 +207,85 @@ public class ManageServiceImpl implements ManageService {
     }
 
     @Override
-    public List<SpuImage> getSpuImageList(String spuId) {
-        SpuImage spuImage = new SpuImage();
-        spuImage.setSpuId(spuId);
+    public List<SpuImage> getSpuImageList(SpuImage spuImage) {
         return spuImageMapper.select(spuImage);
     }
 
     @Override
     public List<SpuSaleAttr> getspuSaleAttrList(String spuId) {
-        SpuSaleAttr saleAttr = new SpuSaleAttr();
-        saleAttr.setSpuId(spuId);
-        return  spuSaleAttrMapper.select(saleAttr);
+        return  spuSaleAttrMapper.selectSpuSaleAttrList(spuId);
 
+    }
+
+    @Override
+    public List<BaseAttrInfo> getAttrList(String catalog3Id) {
+        return baseAttrInfoMapper.selectBaseAttrInfoListByCatalog3Id(catalog3Id);
+    }
+
+    @Override
+    public void saveSkuInfo(SkuInfo skuInfo) {
+        //skuinfo 判断skuid是否为空，是则插入，否则修改
+        if (skuInfo.getId()==null || skuInfo.getId().length()==0){
+            //设置id为自增
+            skuInfo.setId(null);
+            skuInfoMapper.insertSelective(skuInfo);
+        }else {
+            skuInfoMapper.updateByPrimaryKeySelective(skuInfo);
+        }
+
+        //sku img 先删除原有sku图片
+        SkuImage skuImage = new SkuImage();
+        skuImage.setSkuId(skuInfo.getId());
+        skuImageMapper.delete(skuImage);
+
+        //insert 然后插入现有图片
+        List<SkuImage> skuImageList = skuInfo.getSkuImageList();
+        if (skuImageList!=null && skuImageList.size()>0){
+            for (SkuImage image:skuImageList) {
+                //区别null
+                if (image.getId()!=null && image.getId().length()==0){
+                    image.setId(null);
+                }
+                //skuid必须赋值
+                image.setSkuId(skuInfo.getId());
+                skuImageMapper.insertSelective(image);
+            }
+        }
+
+        //sku_attr_value 先删除原有属性
+        SkuAttrValue skuAttrValue = new SkuAttrValue();
+        skuAttrValue.setSkuId(skuInfo.getId());
+        skuAttrValueMapper.delete(skuAttrValue);
+
+        //插入数据 插入传入的属性
+        List<SkuAttrValue> skuAttrValueList = skuInfo.getSkuAttrValueList();
+        if (skuAttrValueList!=null && skuAttrValueList.size()>0){
+            for (SkuAttrValue attrValue:skuAttrValueList) {
+                if (attrValue.getId()!=null && attrValue.getId().length()==0){
+                    attrValue.setId(null);
+                }
+                //skuid
+                attrValue.setSkuId(skuInfo.getId());
+                skuAttrValueMapper.insertSelective(attrValue);
+            }
+        }
+        //sku_sale_attr_value 删除原有消费属性值
+        SkuSaleAttrValue skuSaleAttrValue = new SkuSaleAttrValue();
+        skuSaleAttrValue.setSkuId(skuInfo.getId());
+        skuSaleAttrValueMapper.delete(skuSaleAttrValue);
+
+        //插入数据 插入消费属性值
+        List<SkuSaleAttrValue> skuSaleAttrValueList = skuInfo.getSkuSaleAttrValueList();
+        if (skuSaleAttrValueList!=null && skuSaleAttrValueList.size()>0){
+            for (SkuSaleAttrValue saleAttrValue:skuSaleAttrValueList) {
+                if (saleAttrValue.getId()!=null && saleAttrValue.getId().length()==0){
+                    saleAttrValue.setId(null);
+                }
+
+                //skuid
+                saleAttrValue.setSkuId(skuInfo.getId());
+                skuSaleAttrValueMapper.insertSelective(saleAttrValue);
+            }
+        }
     }
 }

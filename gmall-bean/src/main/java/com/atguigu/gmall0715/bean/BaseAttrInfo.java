@@ -19,5 +19,8 @@ public class BaseAttrInfo implements Serializable {
 
     @Transient //表示数据库中没有的字段，但是在业务中需要
     private List<BaseAttrValue> attrValueList;
+
+
+
 }
 

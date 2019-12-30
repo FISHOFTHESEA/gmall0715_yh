@@ -31,7 +31,7 @@ public interface ManageService {
      *
      * @return
      */
-    List<BaseAttrInfo> getAttrList(String catalog3Id);
+    List<BaseAttrInfo> getAttrList(BaseAttrInfo baseAttrInfo);
 
     /**
      * 保存平台属性，平台属性值
@@ -74,10 +74,10 @@ public interface ManageService {
 
     /**
      * 根据spuid查询图片列表
-     * @param spuId
+     * @param
      * @return
      */
-    List<SpuImage> getSpuImageList(String spuId);
+    List<SpuImage> getSpuImageList(SpuImage spuImage);
 
     /**
      * 根据spuid查询消费属性列表
@@ -85,4 +85,17 @@ public interface ManageService {
      * @return
      */
     List<SpuSaleAttr> getspuSaleAttrList(String spuId);
+
+    /**
+     * 在sku里查询三级分类时查询属性列表
+     * @param catalog3Id
+     * @return
+     */
+    List<BaseAttrInfo> getAttrList(String catalog3Id);
+
+    /**
+     * 保存商品的sku信息
+     * @param skuInfo
+     */
+    void saveSkuInfo(SkuInfo skuInfo);
 }

@@ -31,23 +31,7 @@ public class SpuManageController {
         manageService.saveSpuInfo(spuInfo);
     }
 
-    /**
-     * http://localhost:8082/spuImageList?spuId=59
-     * 根据spuid查询该spu图片列表
-     */
-    @GetMapping("spuImageList")
-    public List<SpuImage> getSpuImageList(String spuId){
-        return manageService.getSpuImageList(spuId);
-    }
 
-    /**
-     * http://localhost:8082/spuSaleAttrList?spuId=59
-     * 根据spuid查询消费属性列表
-     */
-    @GetMapping("spuSaleAttrList")
-    public List<SpuSaleAttr> getspuSaleAttrList(String spuId){
-        return manageService.getspuSaleAttrList(spuId);
-    }
 
 
 

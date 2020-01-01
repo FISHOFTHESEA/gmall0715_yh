@@ -3,6 +3,7 @@ package com.atguigu.gmall0715.service;
 import com.atguigu.gmall0715.bean.*;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ManageService {
     /**
@@ -98,4 +99,25 @@ public interface ManageService {
      * @param skuInfo
      */
     void saveSkuInfo(SkuInfo skuInfo);
+
+    /**
+     * 根据skuid查询对应的sku信息
+     * @param skuId
+     * @return
+     */
+    SkuInfo getSkuInfo(String skuId);
+
+    /**
+     * 根据skuinfo查出该spu下对应的skuinfo列表
+     * @param skuInfo
+     * @return
+     */
+    List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(SkuInfo skuInfo);
+
+    /**
+     * 通过spuid查找出对应sku的id列表，实现点击分类跳转不同页面
+     * @param spuId
+     * @return
+     */
+    Map getSkuValueIdsMap(String spuId);
 }

@@ -2,12 +2,17 @@ package com.atguigu.gmall0715.manage.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall0715.bean.*;
+import com.atguigu.gmall0715.config.RedisUtil;
+import com.atguigu.gmall0715.manage.constant.ManageConst;
 import com.atguigu.gmall0715.manage.mapper.*;
 import com.atguigu.gmall0715.service.ManageService;
 import com.sun.org.apache.xml.internal.resolver.Catalog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +62,9 @@ public class ManageServiceImpl implements ManageService {
 
     @Autowired
     private SkuSaleAttrValueMapper skuSaleAttrValueMapper;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     @Override
     public List<BaseCatalog1> getCatalog1() {
@@ -293,11 +301,67 @@ public class ManageServiceImpl implements ManageService {
 
     @Override
     public SkuInfo getSkuInfo(String skuId) {
+        //测试redis
+        Jedis jedis = null;
+        SkuInfo skuInfo = null;
+        try {
+            jedis = redisUtil.getJedis();
+            //定义key
+            String skuInfoKey = ManageConst.SKUKEY_PREFIX+skuId+ManageConst.SKUKEY_SUFFIX;
+
+            String skuInfoJson = jedis.get(skuInfoKey);
+
+            if (skuInfoJson == null || skuInfoJson.length() == 0) {
+                //没有数据，需要加锁，取出完数据，放入缓存，下次直接从缓存中取
+                System.out.println("没有命中缓存");
+                //定义key
+                String skuLockKey = ManageConst.SKUKEY_PREFIX + skuId + ManageConst.SKUKEY_SUFFIX;
+                //生成锁
+                String lockKey = jedis.set(skuLockKey, "OK", "NX", "PX", ManageConst.SKULOCK_EXPIRE_PX);
+                if ("OK".equals(lockKey)) {
+                    System.out.println("获取锁");
+                    //从数据库中取得数据
+                    skuInfo = getSkuInfoDB(skuId);
+                    //将数据放入缓存
+                    //将对象转换成字符串
+                    String jsonString = JSON.toJSONString(skuInfo);
+                    jedis.setex(skuInfoKey, ManageConst.SKUKEY_TIMEOUT, jsonString);
+                    jedis.close();
+                    return skuInfo;
+                }else{
+                    System.out.println("wait!");
+                    //wait
+                    Thread.sleep(1000);
+                    //自旋
+                    return getSkuInfo(skuId);
+                }
+            }else {
+                //有数据
+                skuInfo = JSON.parseObject(skuInfoJson,SkuInfo.class);
+                jedis.close();
+                return skuInfo;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return getSkuInfoDB(skuId);
+
+    }
+
+    public SkuInfo getSkuInfoDB(String skuId){
+        //单纯的信息
         SkuInfo skuInfo = skuInfoMapper.selectByPrimaryKey(skuId);
+        //查询图片信息
         SkuImage skuImage = new SkuImage();
         skuImage.setSkuId(skuId);
         List<SkuImage> select = skuImageMapper.select(skuImage);
         skuInfo.setSkuImageList(select);
+        //skuAttrValue信息
+        SkuAttrValue skuAttrValue = new SkuAttrValue();
+        skuAttrValue.setSkuId(skuId);
+        List<SkuAttrValue> skuAttrValues = skuAttrValueMapper.select(skuAttrValue);
+        skuInfo.setSkuAttrValueList(skuAttrValues);
+
         return skuInfo;
     }
 

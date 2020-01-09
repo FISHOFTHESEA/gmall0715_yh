@@ -20,4 +20,16 @@ public interface UserService {
      */
     List<UserAddress> findUserAddressByUserId(String userId);
 
+    /**
+     * 核对后台登录信息+用户登录信息
+     * @param userInfo
+     */
+    UserInfo login(UserInfo userInfo);
+
+    /**
+     * 检查redis缓存里是否存在用户信息，存在延长过期时间
+     * @param userId
+     * @return
+     */
+    UserInfo verify(String userId);
 }

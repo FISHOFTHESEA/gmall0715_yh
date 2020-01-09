@@ -15,4 +15,9 @@ public interface ListService {
      * 根据检索条件查询数据
      */
     SkuLsResult search(SkuLsParams skuLsParams);
+
+    /**
+     * 使用redis实现热度增加
+     */
+    void incrHotScore(String skuId);
 }

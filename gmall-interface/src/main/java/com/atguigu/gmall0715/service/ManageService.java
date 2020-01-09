@@ -120,4 +120,10 @@ public interface ManageService {
      * @return
      */
     Map getSkuValueIdsMap(String spuId);
+
+    /**
+     * 通过查询结果中的属性id列表查询对应的属性
+     */
+    List<BaseAttrInfo> getAttrList(List<String> attrValueIdList);
+
 }

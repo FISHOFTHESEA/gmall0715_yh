@@ -1,6 +1,9 @@
 package com.atguigu.gmall0715.manage.service.impl;
 
-import com.alibaba.dubbo.config.annotation.Reference;
+
+
+
+import org.apache.commons.lang3.StringUtils;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall0715.bean.*;
@@ -8,12 +11,9 @@ import com.atguigu.gmall0715.config.RedisUtil;
 import com.atguigu.gmall0715.manage.constant.ManageConst;
 import com.atguigu.gmall0715.manage.mapper.*;
 import com.atguigu.gmall0715.service.ManageService;
-import com.sun.org.apache.xml.internal.resolver.Catalog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -379,5 +379,13 @@ public class ManageServiceImpl implements ManageService {
             hashMap.put(map.get("value_ids"),map.get("sku_id"));
         }
         return hashMap;
+    }
+
+    @Override
+    public List<BaseAttrInfo> getAttrList(List<String> attrValueIdList) {
+        String attrValueIds = StringUtils.join(attrValueIdList.toArray(),",");
+        System.out.println("传入的字符串"+attrValueIds);
+        List<BaseAttrInfo> baseAttrInfoList = baseAttrInfoMapper.selectAttrInfoListByIds(attrValueIds);
+        return baseAttrInfoList;
     }
 }

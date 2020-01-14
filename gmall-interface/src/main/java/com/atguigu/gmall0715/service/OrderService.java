@@ -1,6 +1,10 @@
 package com.atguigu.gmall0715.service;
 
 import com.atguigu.gmall0715.bean.OrderInfo;
+import com.atguigu.gmall0715.bean.enums.ProcessStatus;
+
+import java.util.List;
+import java.util.Map;
 
 public interface OrderService {
     /**
@@ -38,4 +42,39 @@ public interface OrderService {
      * @return
      */
     boolean checkStock(String skuId, Integer skuNum);
+
+    /**
+     * 通过订单id查询订单信息
+     * @param orderId
+     * @return
+     */
+    OrderInfo getOrderInfo(String orderId);
+
+    /**
+     * 修改订单状态
+     * @param orderId
+     * @param paid
+     */
+    void updateOrderStatus(String orderId, ProcessStatus paid);
+
+    /**
+     * 根据orderid减少对应商品的库存
+     * @param orderId
+     */
+    void sendOrderStatus(String orderId);
+
+    /**
+     * 订单拆分
+     * @param orderId
+     * @param wareSkuMap
+     * @return
+     */
+    List<OrderInfo> splitOrder(String orderId, String wareSkuMap);
+
+    /**
+     * 初始化订单
+     * @param orderInfo
+     * @return
+     */
+    Map initWareOrder(OrderInfo orderInfo);
 }
